@@ -62,7 +62,7 @@ class MeetWrapper { // eslint-disable-line
     }
 
     const bodyObserver = new MutationObserver(() => {
-      if (document.querySelector('div[data-second-screen]')) {
+      if (document.querySelector('div[data-meeting-title]')) {
         this.#enterMeeting();
       } else if (document.querySelector('[jscontroller=dyDNGc]')) {
         this.#enterGreenRoom();
@@ -710,7 +710,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getPresentationBar() {
-    return document.querySelector('[jscontroller=A5S1ke]');
+    return document.querySelector('[jscontroller=E9nYD]');
   }
 
   /**
@@ -719,8 +719,8 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getMicButton() {
-    const sel = '[jscontroller=t8kvj]';
-    return document.querySelector(sel)?.querySelector('button');
+    const sel = '[jscontroller=t2mBxb]';
+    return document.querySelector(sel)?.querySelector('button[data-is-muted]');
   }
 
   /**
@@ -729,8 +729,8 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getCamButton() {
-    const sel = '[jscontroller=DXtw0b]';
-    return document.querySelector(sel)?.querySelector('button');
+    const sel = '[jscontroller=bwqwSd]';
+    return document.querySelector(sel)?.querySelector('button[data-is-muted]');
   }
 
   /**
@@ -749,7 +749,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getHandButton() {
-    const sel = '[jscontroller=HRWIlc]';
+    const sel = '[jscontroller=LtjzW]';
     return document.querySelector(sel)?.querySelector('button');
   }
 
@@ -769,7 +769,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getInfoButton() {
-    const sel = '[data-panel-id="5"]';
+    const sel = 'button[data-panel-id="5"]';
     return document.querySelector(sel);
   }
 
@@ -779,7 +779,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getPeopleButton() {
-    const sel = '[data-panel-id="1"]';
+    const sel = 'button[data-panel-id="1"]';
     return document.querySelector(sel);
   }
 
@@ -789,7 +789,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getChatButton() {
-    const sel = '[data-panel-id="2"]';
+    const sel = 'button[data-panel-id="2"]';
     return document.querySelector(sel);
   }
 
@@ -799,7 +799,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getActivitiesButton() {
-    const sel = '[data-panel-id="10"]';
+    const sel = 'button[data-panel-id="10"]';
     return document.querySelector(sel);
   }
 
@@ -809,7 +809,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getReactionButton() {
-    const sel = '[jscontroller=aTG8jc]';
+    const sel = '[jscontroller=M3NJxf]';
     return document.querySelector(sel)?.querySelector('button');
   }
 
@@ -840,8 +840,8 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getHangupButton() {
-    const sel = '[jsname=CQylAd]';
-    return document.querySelector(sel);
+    const sel = '[jscontroller=m1IMT]';
+    return document.querySelector(sel)?.querySelector('button');
   }
 
   /**
@@ -850,7 +850,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getGreenRoomMicButton() {
-    const sel = '[jscontroller=t8kvj]';
+    const sel = '[jscontroller=t2mBxb]';
     return document.querySelector(sel)?.querySelector('[role=button]');
   }
 
@@ -860,7 +860,7 @@ class MeetWrapper { // eslint-disable-line
    * @return {?Element}
    */
   #getGreenRoomCamButton() {
-    const sel = '[jscontroller=DXtw0b]';
+    const sel = '[jscontroller=bwqwSd]';
     return document.querySelector(sel)?.querySelector('[role=button]');
   }
 
