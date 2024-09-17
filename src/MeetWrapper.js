@@ -21,6 +21,9 @@
 class MeetWrapper { // eslint-disable-line
   #currentRoom;
   #hasBeenActivated = false;
+  #reactions;
+  #currentReaction;
+  #setNextReaction;
 
   #ROOM_NAMES = {
     lobby: 'lobby',
@@ -70,7 +73,7 @@ class MeetWrapper { // eslint-disable-line
         this.#enterExitHall();
       }
     });
-    bodyObserver.observe(document.body, {attributes: true, childList: true});
+    bodyObserver.observe(document.body, { attributes: true, childList: true });
   }
 
 
@@ -148,6 +151,8 @@ class MeetWrapper { // eslint-disable-line
       this.#setupActivitiesButton();
       this.#setupPresentingButton();
       this.#setupReactionButton();
+      this.#setupReactionToggleButton();
+      this.#setupReactionsButton();
     }, 500);
 
     // If it was an instant meeting, automatically close
@@ -223,6 +228,10 @@ class MeetWrapper { // eslint-disable-line
     if (this.#currentRoom === this.#ROOM_NAMES.meeting) {
       if (buttonId === this.#streamDeck.buttonNameToId('reaction')) {
         this.#tapReactions();
+      } else if (buttonId === this.#streamDeck.buttonNameToId('reaction-toggle')) {
+        this.#tapReactionToggle();
+      } else if (buttonId === this.#streamDeck.buttonNameToId('reactions/emoticons')) {
+        this.#tapReactionEmoticon();
       } else if (buttonId === this.#streamDeck.buttonNameToId('info')) {
         this.#tapInfo();
       } else if (buttonId === this.#streamDeck.buttonNameToId('users')) {
@@ -302,6 +311,25 @@ class MeetWrapper { // eslint-disable-line
     this.#drawButton(`fullscreen-off`);
   }
 
+  #clearReactionButtons() {
+    if (!this.#streamDeck?.isConnected) {
+      return;
+    }
+    const button1Id = this.#streamDeck.buttonNameToId('reaction-toggle');
+    const button2Id = this.#streamDeck.buttonNameToId('reactions/emoticons');
+    if (button1Id === undefined || button1Id < 0) {
+      console.warn('*SD-Meet*', `clearButton failed, unknown icon name: 'reaction-toggle'`);
+      return; // Not defined in the current configuration.
+    } else {
+      this.#streamDeck.clearButton(button1Id);
+    }
+    if (button2Id === undefined || button2Id < 0) {
+      console.warn('*SD-Meet*', `clearButton failed, unknown icon name: 'reactions/emoticons'`);
+      return; // Not defined in the current configuration.
+    } else {
+      this.#streamDeck.clearButton(button2Id);
+    }
+  }
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    *
@@ -320,7 +348,7 @@ class MeetWrapper { // eslint-disable-line
     const micObserver = new MutationObserver(() => {
       this.#updateMicButton();
     });
-    micObserver.observe(micButton, {attributeFilter: ['data-is-muted']});
+    micObserver.observe(micButton, { attributeFilter: ['data-is-muted'] });
     this.#updateMicButton();
   }
 
@@ -335,7 +363,7 @@ class MeetWrapper { // eslint-disable-line
     const camObserver = new MutationObserver(() => {
       this.#updateCamButton();
     });
-    camObserver.observe(camButton, {attributeFilter: ['data-is-muted']});
+    camObserver.observe(camButton, { attributeFilter: ['data-is-muted'] });
     this.#updateCamButton();
   }
 
@@ -350,7 +378,7 @@ class MeetWrapper { // eslint-disable-line
     const ccObserver = new MutationObserver(() => {
       this.#updateCCButton();
     });
-    ccObserver.observe(ccButton, {attributeFilter: ['aria-pressed']});
+    ccObserver.observe(ccButton, { attributeFilter: ['aria-pressed'] });
     this.#updateCCButton();
   }
 
@@ -365,7 +393,7 @@ class MeetWrapper { // eslint-disable-line
     const handObserver = new MutationObserver(() => {
       this.#updateHandButton();
     });
-    handObserver.observe(handButton, {attributeFilter: ['aria-pressed']});
+    handObserver.observe(handButton, { attributeFilter: ['aria-pressed'] });
     this.#updateHandButton();
   }
 
@@ -380,7 +408,7 @@ class MeetWrapper { // eslint-disable-line
     const infoObserver = new MutationObserver(() => {
       this.#updateInfoButton();
     });
-    infoObserver.observe(infoButton, {attributeFilter: ['aria-pressed']});
+    infoObserver.observe(infoButton, { attributeFilter: ['aria-pressed'] });
     this.#updateInfoButton();
   }
 
@@ -395,7 +423,7 @@ class MeetWrapper { // eslint-disable-line
     const observer = new MutationObserver(() => {
       this.#updatePeopleButton();
     });
-    observer.observe(button, {attributeFilter: ['aria-pressed']});
+    observer.observe(button, { attributeFilter: ['aria-pressed'] });
     this.#updatePeopleButton();
   }
 
@@ -410,7 +438,7 @@ class MeetWrapper { // eslint-disable-line
     const observer = new MutationObserver(() => {
       this.#updateChatButton();
     });
-    observer.observe(button, {attributeFilter: ['aria-pressed']});
+    observer.observe(button, { attributeFilter: ['aria-pressed'] });
     this.#updateChatButton();
   }
 
@@ -425,7 +453,7 @@ class MeetWrapper { // eslint-disable-line
     const observer = new MutationObserver(() => {
       this.#updateActivitiesButton();
     });
-    observer.observe(button, {attributeFilter: ['aria-pressed']});
+    observer.observe(button, { attributeFilter: ['aria-pressed'] });
     this.#updateActivitiesButton();
   }
 
@@ -440,7 +468,7 @@ class MeetWrapper { // eslint-disable-line
     const observer = new MutationObserver(() => {
       this.#updatePresentingButton();
     });
-    observer.observe(presentationBar, {childList: true});
+    observer.observe(presentationBar, { childList: true });
     this.#updatePresentingButton();
   }
 
@@ -455,10 +483,41 @@ class MeetWrapper { // eslint-disable-line
     const observer = new MutationObserver(() => {
       this.#updateReactionButton();
     });
-    observer.observe(button, {attributeFilter: ['aria-pressed']});
+    observer.observe(button, { attributeFilter: ['aria-pressed'] });
     this.#updateReactionButton();
   }
 
+  /**
+   * Setup the meeting room reaction toggle button.
+   */
+  #setupReactionToggleButton() {
+    this.#updateReactionToggleButton();
+  }
+
+  /**
+   * Setup the meeting room reaction trigger buttons.
+   */
+  #setupReactionsButton() {
+    const reactions = [
+      "1f496", // 💖
+      "1f44d", // 👍
+      "1f389", // 🎉
+      "1f44f", // 👏
+      "1f602", // 😂
+      "1f62e", // 😮
+      "1f622", // 😢
+      "1f914", // 🤔
+      "1f44e"  // 👎
+    ];
+
+    let currentIndex = -1;
+    this.#setNextReaction = function () {
+      currentIndex = currentIndex + 1 >= reactions.length ? 0 : currentIndex + 1;
+      this.#currentReaction = reactions[currentIndex];
+    };
+    this.#setNextReaction();
+    this.#updateReactionsButton();
+  }
   /**
    * Setup the green room mic button.
    */
@@ -470,7 +529,7 @@ class MeetWrapper { // eslint-disable-line
     const observer = new MutationObserver(() => {
       this.#updateGreenRoomMicButton();
     });
-    observer.observe(button, {attributeFilter: ['data-is-muted']});
+    observer.observe(button, { attributeFilter: ['data-is-muted'] });
     this.#updateGreenRoomMicButton();
   }
 
@@ -485,7 +544,7 @@ class MeetWrapper { // eslint-disable-line
     const observer = new MutationObserver(() => {
       this.#updateGreenRoomCamButton();
     });
-    observer.observe(button, {attributeFilter: ['data-is-muted']});
+    observer.observe(button, { attributeFilter: ['data-is-muted'] });
     this.#updateGreenRoomCamButton();
   }
 
@@ -611,6 +670,14 @@ class MeetWrapper { // eslint-disable-line
   }
 
   /**
+   * Return true if Reactions are opened, false otherwise.
+   */
+  #areReactionsOpen() {
+    const button = this.#getReactionButton();
+    return !!button && button.getAttribute('aria-pressed') == 'true';
+  }
+
+  /**
    * Update the StreamDeck Send a Reaction button to indicate current state.
    */
   #updateReactionButton() {
@@ -618,9 +685,40 @@ class MeetWrapper { // eslint-disable-line
     if (!button) {
       return;
     }
-    const newVal = button.getAttribute('aria-pressed') == 'true';
-    const img = newVal ? 'reaction-open' : 'reaction';
-    this.#drawButton(img);
+    if (this.#areReactionsOpen()) {
+      const img = 'reaction-open';
+      this.#drawButton(img);
+      this.#updateReactionToggleButton();
+      this.#updateReactionsButton();
+    } else {
+      const img = 'reaction';
+      this.#drawButton(img);
+      this.#clearReactionButtons();
+    }
+  }
+
+  /**
+   * Update the StreamDeck Toggle Reactions button.
+   */
+  #updateReactionToggleButton() {
+    if (this.#areReactionsOpen()) {
+      const img = 'reaction-toggle';
+      this.#drawButton(img);
+    } else {
+      this.#clearReactionButtons();
+    }
+  }
+
+  /**
+   * Update the StreamDeck Send a Reaction button to indicate current state.
+   */
+  #updateReactionsButton() {
+    if (this.#areReactionsOpen()) {
+      const img = 'reactions/u' + this.#currentReaction;
+      this.#drawButton(img);
+    } else {
+      this.#clearReactionButtons();
+    }
   }
 
   /**
@@ -1031,6 +1129,23 @@ class MeetWrapper { // eslint-disable-line
   #tapReactions() {
     const button = this.#getReactionButton();
     this.#tapButtonWrapper(button, 'reactions');
+  }
+
+  /**
+   * Taps the Send a reaction button, to toggle reaction panel (meeting room).
+   */
+  #tapReactionToggle() {
+    this.#setNextReaction();
+    this.#updateReactionsButton();
+  }
+
+  /**
+   * Taps the Send a reaction button, to toggle reaction panel (meeting room).
+   */
+  #tapReactionEmoticon() {
+    const emoji = String.fromCodePoint("0x" + this.#currentReaction);
+    const button = this.#getReactionEmojiButton(emoji);
+    this.#tapButtonWrapper(button, 'reactions/' + this.#currentReaction);
   }
 
   /**

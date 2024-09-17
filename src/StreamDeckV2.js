@@ -33,9 +33,9 @@ class StreamDeckV2 { // eslint-disable-line
 
   buttonNameToIdMap = {
     // All rooms
-    'fullscreen-on': 2,
-    'fullscreen-off': 2,
-    'fullscreen-disabled': 2,
+    'fullscreen-on': 3,
+    'fullscreen-off': 3,
+    'fullscreen-disabled': 3,
 
     // Lobby
     'start-next': 5,
@@ -51,6 +51,18 @@ class StreamDeckV2 { // eslint-disable-line
     // Meeting
     'reaction': 0,
     'reaction-open': 0,
+    'reaction-toggle': 1,
+    'reactions/emoticons': 2,
+    'reactions/u1f496': 2,
+    'reactions/u1f44d': 2,
+    'reactions/u1f389': 2,
+    'reactions/u1f44f': 2,
+    'reactions/u1f602': 2,
+    'reactions/u1f62e': 2,
+    'reactions/u1f622': 2,
+    'reactions/u1f914': 2,
+    'reactions/u1f44e': 2,
+    'reaction': 0,
     'info': 5,
     'info-open': 5,
     'users': 6,

@@ -60,7 +60,7 @@ In the green room, there are three buttons enabled:
 
 ### In the meeting
 
-While in the meeting, there are sevent buttons enabled:
+While in the meeting, there are up to thirteen buttons enabled:
 
 * Mute/unmute mic.
 * Enable/disable cam.
@@ -70,7 +70,8 @@ While in the meeting, there are sevent buttons enabled:
 * Show/hide meeting info.
 * Show/hide people in meeting.
 * Show/hide chat.
-* Show/hide activities panel (when available).
+* Show/hide reactions panel (when available), toggle between and send reactions (smilies). (up to three buttons)
+* Toggle full screen.
 * Leave meeting.
 
 ### After meeting
